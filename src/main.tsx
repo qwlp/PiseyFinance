@@ -17,6 +17,7 @@ import {
   BookOpen,
   Bot,
   Building2,
+  Calculator,
   Check,
   ChevronRight,
   CircleHelp,
@@ -60,6 +61,7 @@ const copy = {
     explore: "ស្វែងរក",
     consult: "ពិគ្រោះ",
     learn: "ស្វែងយល់",
+    loan: "គណនាឥណទាន",
     profile: "គណនី",
     search: "ស្វែងរកឈ្មោះធនាគារ ឬគ្រឹះស្ថាន…",
     title: "ស្វែងរកគ្រឹះស្ថានហិរញ្ញវត្ថុ",
@@ -78,6 +80,7 @@ const copy = {
     explore: "Explore",
     consult: "Consult",
     learn: "Learn",
+    loan: "Loan",
     profile: "Profile",
     search: "Search banks or institutions…",
     title: "Find a financial institution",
@@ -169,6 +172,7 @@ function App() {
       />
     );
   else if (path === "/consult") content = <Consult {...shared} />;
+  else if (path === "/loan") content = <LoanCalculator locale={locale} />;
   else if (path === "/learn") content = <Learn {...shared} />;
   else if (path.startsWith("/learn/"))
     content = <LessonArticle slug={path.split("/")[2]} {...shared} />;
@@ -273,6 +277,9 @@ function Header({
         <button onClick={() => go("/consult")}>
           {locale === "km" ? "ពិគ្រោះ" : "Consult"}{" "}
         </button>
+        <button onClick={() => go("/loan")}>
+          {locale === "km" ? "គណនាឥណទាន" : "Loan"}{" "}
+        </button>
       </nav>
       <div className="header-actions">
         <button
@@ -314,6 +321,9 @@ function Header({
           </button>
           <button onClick={() => navigate("/consult")}>
             {locale === "km" ? "ពិគ្រោះ" : "Consult"}{" "}
+          </button>
+          <button onClick={() => navigate("/loan")}>
+            {locale === "km" ? "គណនាឥណទាន" : "Loan"}{" "}
           </button>
           <button onClick={() => navigate("/profile")}>
             {locale === "km" ? "ចូលគណនី" : "Sign in"}{" "}
@@ -542,12 +552,14 @@ function HomeFooter({
       ? [
           ["គ្រឹះស្ថាន", "/institutions"],
           ["ប្រៀបធៀប", "/compare"],
+          ["គណនាឥណទាន", "/loan"],
           ["ស្វែងយល់", "/learn"],
           ["ពិគ្រោះ", "/consult"],
         ]
       : [
           ["Institutions", "/institutions"],
           ["Compare", "/compare"],
+          ["Loan calculator", "/loan"],
           ["Learn", "/learn"],
           ["Consult", "/consult"],
         ];
@@ -567,6 +579,145 @@ function HomeFooter({
         </nav>
       </div>
     </footer>
+  );
+}
+
+function LoanCalculator({ locale }: { locale: Locale }) {
+  const [amount, setAmount] = useState(10000);
+  const [rate, setRate] = useState(8);
+  const [years, setYears] = useState(3);
+  const [currency, setCurrency] = useState<"USD" | "KHR">("USD");
+
+  const principal = Math.max(0, Number(amount) || 0);
+  const annualRate = Math.max(0, Number(rate) || 0);
+  const months = Math.max(1, Math.round((Number(years) || 0) * 12));
+  const monthlyRate = annualRate / 100 / 12;
+  const monthlyPayment =
+    monthlyRate === 0
+      ? principal / months
+      : (principal * monthlyRate * (1 + monthlyRate) ** months) /
+        ((1 + monthlyRate) ** months - 1);
+  const totalPayment = monthlyPayment * months;
+  const totalInterest = Math.max(0, totalPayment - principal);
+
+  const money = (value: number) => {
+    const formatted = new Intl.NumberFormat("en-US", {
+      minimumFractionDigits: currency === "USD" ? 2 : 0,
+      maximumFractionDigits: currency === "USD" ? 2 : 0,
+    }).format(Number.isFinite(value) ? value : 0);
+    return currency === "USD" ? `$${formatted}` : `${formatted} ៛`;
+  };
+
+  const isKm = locale === "km";
+  return (
+    <section className="loan-page">
+      <header className="loan-heading">
+        <h1>{isKm ? "ម៉ាស៊ីនគណនាឥណទាន" : "Loan calculator"}</h1>
+        <p>
+          {isKm
+            ? "ប៉ាន់ស្មានការបង់រំលស់ប្រចាំខែ និងការប្រាក់សរុបរបស់អ្នក។"
+            : "Estimate your monthly repayment and see the total cost of a loan."}
+        </p>
+      </header>
+
+      <div className="loan-workspace">
+        <form className="loan-form" onSubmit={(event) => event.preventDefault()}>
+          <div className="loan-form-head">
+            <h2>{isKm ? "ព័ត៌មានឥណទាន" : "Loan details"}</h2>
+            <label>
+              <span className="sr-only">{isKm ? "រូបិយប័ណ្ណ" : "Currency"}</span>
+              <select
+                aria-label={isKm ? "រូបិយប័ណ្ណ" : "Currency"}
+                value={currency}
+                onChange={(event) =>
+                  setCurrency(event.target.value as "USD" | "KHR")
+                }
+              >
+                <option value="USD">USD ($)</option>
+                <option value="KHR">KHR (៛)</option>
+              </select>
+            </label>
+          </div>
+
+          <label className="loan-field">
+            <span>{isKm ? "ចំនួនប្រាក់កម្ចី" : "Loan amount"}</span>
+            <div>
+              <b>{currency === "USD" ? "$" : "៛"}</b>
+              <input
+                aria-label={isKm ? "ចំនួនប្រាក់កម្ចី" : "Loan amount"}
+                type="number"
+                min="0"
+                step={currency === "USD" ? "100" : "100000"}
+                value={amount}
+                onChange={(event) => setAmount(Number(event.target.value))}
+              />
+            </div>
+          </label>
+
+          <div className="loan-field-row">
+            <label className="loan-field">
+              <span>{isKm ? "អត្រាការប្រាក់ប្រចាំឆ្នាំ" : "Annual interest rate"}</span>
+              <div>
+                <input
+                  aria-label={isKm ? "អត្រាការប្រាក់ប្រចាំឆ្នាំ" : "Annual interest rate"}
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  value={rate}
+                  onChange={(event) => setRate(Number(event.target.value))}
+                />
+                <b>%</b>
+              </div>
+            </label>
+            <label className="loan-field">
+              <span>{isKm ? "រយៈពេលកម្ចី" : "Loan term"}</span>
+              <div>
+                <input
+                  aria-label={isKm ? "រយៈពេលកម្ចី" : "Loan term"}
+                  type="number"
+                  min="1"
+                  max="50"
+                  step="1"
+                  value={years}
+                  onChange={(event) => setYears(Number(event.target.value))}
+                />
+                <b>{isKm ? "ឆ្នាំ" : "years"}</b>
+              </div>
+            </label>
+          </div>
+        </form>
+
+        <aside className="loan-results" aria-live="polite">
+          <span>{isKm ? "ការបង់ប្រចាំខែប៉ាន់ស្មាន" : "Estimated monthly payment"}</span>
+          <strong>{money(monthlyPayment)}</strong>
+          <small>
+            {isKm ? `បង់ចំនួន ${months} ខែ` : `${months} monthly payments`}
+          </small>
+
+          <dl>
+            <div>
+              <dt>{isKm ? "ប្រាក់ដើម" : "Principal"}</dt>
+              <dd>{money(principal)}</dd>
+            </div>
+            <div>
+              <dt>{isKm ? "ការប្រាក់សរុប" : "Total interest"}</dt>
+              <dd>{money(totalInterest)}</dd>
+            </div>
+            <div>
+              <dt>{isKm ? "ចំនួនសរុបត្រូវបង់" : "Total repayment"}</dt>
+              <dd>{money(totalPayment)}</dd>
+            </div>
+          </dl>
+          <p className="loan-note">
+            <Info />
+            {isKm
+              ? "នេះជាការប៉ាន់ស្មានប៉ុណ្ណោះ។ ថ្លៃសេវា និងលក្ខខណ្ឌរបស់គ្រឹះស្ថានអាចធ្វើឱ្យចំនួនពិតប្រាកដខុសគ្នា។"
+              : "This is an estimate. Fees and lender terms may change the actual repayment amount."}
+          </p>
+        </aside>
+      </div>
+    </section>
   );
 }
 
@@ -2168,6 +2319,7 @@ function MobileNav({
   const items: [[any, string, string], ...Array<[any, string, string]>] = [
     [HomeIcon, t.home, "/"],
     [Search, t.explore, "/institutions"],
+    [Calculator, t.loan, "/loan"],
     [Bot, t.consult, "/consult"],
     [BookOpen, t.learn, "/learn"],
     [UserRound, t.profile, "/profile"],
