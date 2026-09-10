@@ -29,6 +29,8 @@ import {
   Home as HomeIcon,
   Info,
   Languages,
+  LayoutGrid,
+  List,
   LockKeyhole,
   LogOut,
   Mail,
@@ -59,7 +61,7 @@ const copy = {
   km: {
     home: "ទំព័រដើម",
     explore: "ស្វែងរក",
-    consult: "ពិគ្រោះ",
+    consult: "ប្រឹក្សា",
     learn: "ស្វែងយល់",
     loan: "គណនាឥណទាន",
     profile: "គណនី",
@@ -275,7 +277,7 @@ function Header({
           {locale === "km" ? "ស្វែងយល់" : "Learn"}{" "}
         </button>
         <button onClick={() => go("/consult")}>
-          {locale === "km" ? "ពិគ្រោះ" : "Consult"}{" "}
+          {locale === "km" ? "ប្រឹក្សា" : "Consult"}{" "}
         </button>
         <button onClick={() => go("/loan")}>
           {locale === "km" ? "គណនាឥណទាន" : "Loan"}{" "}
@@ -320,7 +322,7 @@ function Header({
             {locale === "km" ? "ស្វែងយល់" : "Learn"}{" "}
           </button>
           <button onClick={() => navigate("/consult")}>
-            {locale === "km" ? "ពិគ្រោះ" : "Consult"}{" "}
+            {locale === "km" ? "ប្រឹក្សា" : "Consult"}{" "}
           </button>
           <button onClick={() => navigate("/loan")}>
             {locale === "km" ? "គណនាឥណទាន" : "Loan"}{" "}
@@ -554,7 +556,7 @@ function HomeFooter({
           ["ប្រៀបធៀប", "/compare"],
           ["គណនាឥណទាន", "/loan"],
           ["ស្វែងយល់", "/learn"],
-          ["ពិគ្រោះ", "/consult"],
+          ["ប្រឹក្សា", "/consult"],
         ]
       : [
           ["Institutions", "/institutions"],
@@ -837,6 +839,10 @@ function Explore(s: Shared) {
   const { institutions } = useData();
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [type, setType] = useState("all");
+  const [view, setView] = useState<"list" | "grid">(() =>
+    localStorage.getItem("institution-view") === "grid" ? "grid" : "list",
+  );
+  useEffect(() => localStorage.setItem("institution-view", view), [view]);
   const results = useMemo(
     () =>
       institutions.filter(
@@ -904,8 +910,34 @@ function Explore(s: Shared) {
         <b>
           {results.length} {s.locale === "km" ? "លទ្ធផល" : "institutions"}{" "}
         </b>{" "}
+        <div
+          className="view-switcher"
+          role="group"
+          aria-label={s.locale === "km" ? "ទម្រង់បង្ហាញ" : "View options"}
+        >
+          <button
+            type="button"
+            className={view === "list" ? "active" : ""}
+            aria-label={s.locale === "km" ? "បង្ហាញជាបញ្ជី" : "List view"}
+            aria-pressed={view === "list"}
+            title={s.locale === "km" ? "បញ្ជី" : "List"}
+            onClick={() => setView("list")}
+          >
+            <List />
+          </button>
+          <button
+            type="button"
+            className={view === "grid" ? "active" : ""}
+            aria-label={s.locale === "km" ? "បង្ហាញជាប្រអប់" : "Grid view"}
+            aria-pressed={view === "grid"}
+            title={s.locale === "km" ? "ប្រអប់" : "Grid"}
+            onClick={() => setView("grid")}
+          >
+            <LayoutGrid />
+          </button>
+        </div>
       </div>
-      <div className="institution-list">
+      <div className={`institution-list view-${view}`}>
         {results.map((i) => (
           <InstitutionRow key={i.id} institution={i} {...s} />
         ))}{" "}

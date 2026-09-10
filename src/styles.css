@@ -200,6 +200,25 @@
 @media(max-width:1000px){.institution-row{grid-template-columns:52px minmax(220px,1fr) 165px 210px}}
 @media(max-width:720px){.directory-page{padding-top:24px}.directory-page .page-title{margin-bottom:18px}.directory-tools{display:block}.directory-tools .filters{margin-top:9px;overflow-x:auto;padding-bottom:2px}.institution-row{grid-template-columns:48px minmax(0,1fr) auto;gap:12px;padding:14px 0}.institution-row .institution-logo{width:44px;height:44px}.row-status{grid-column:2}.row-status>small{display:none}.row-status>span{margin:0;min-height:0}.row-status .nbc-logo{width:19px;height:21px}.row-actions{grid-column:3;grid-row:1/3}.row-actions .row-compare span{display:none}.row-actions .row-compare,.row-actions .row-details{width:40px;padding:0!important}.row-actions .row-details{font-size:0}.row-institution h2{white-space:normal}.directory-page .results-head{margin-top:14px}}
 
+/* Directory view switcher and card view. */
+.view-switcher{display:flex;padding:3px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.view-switcher button{width:32px;height:28px;padding:0;border:0;border-radius:5px;background:transparent;color:#81798a;display:grid;place-items:center}
+.view-switcher button:hover{background:#f3f0f6;color:#443851}
+.view-switcher button.active{background:var(--deep);color:#fff}
+.view-switcher svg{width:15px;height:15px}
+.institution-list.view-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding-top:18px}
+.view-grid .institution-row{min-width:0;min-height:236px;padding:20px;border:1px solid var(--line);border-radius:12px;background:#fff;display:grid;grid-template-columns:50px minmax(0,1fr);grid-template-rows:auto 1fr auto;gap:15px 13px;align-items:start}
+.view-grid .institution-row .institution-logo{width:48px;height:48px;border-radius:9px}
+.view-grid .row-institution{align-self:center}
+.view-grid .row-institution h2{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.view-grid .row-status{grid-column:1/-1;padding-top:13px;border-top:1px solid var(--line)}
+.view-grid .row-status>span{min-height:27px}
+.view-grid .row-actions{grid-column:1/-1;width:100%;justify-content:space-between;align-self:end}
+.view-grid .row-actions button{height:38px}
+.view-grid .row-details{margin-left:auto}
+@media(max-width:1000px){.institution-list.view-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.institution-list.view-grid{grid-template-columns:1fr;padding-top:12px}.view-grid .institution-row{min-height:0;grid-template-columns:46px minmax(0,1fr);grid-template-rows:auto auto auto;padding:16px}.view-grid .institution-row .institution-logo{width:44px;height:44px}.view-grid .row-status{grid-column:1/-1}.view-grid .row-actions{grid-column:1/-1;grid-row:auto}.view-grid .row-actions .row-compare,.view-grid .row-actions .row-details{width:auto;padding:0 11px!important}.view-grid .row-actions .row-compare span{display:inline}.view-grid .row-actions .row-details{font-size:11px}}
+
 /* Keep the glossary call-to-action consistent with the surrounding photo tiles. */
 .learn-preview .term-all{
   isolation:isolate;
