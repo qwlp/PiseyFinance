@@ -843,9 +843,14 @@ function Explore(s: Shared) {
     localStorage.getItem("institution-view") === "grid" ? "grid" : "list",
   );
   useEffect(() => localStorage.setItem("institution-view", view), [view]);
-  const results = useMemo(
-    () =>
-      institutions.filter(
+  const results = useMemo(() => {
+    const collator = new Intl.Collator(s.locale, {
+      numeric: true,
+      sensitivity: "base",
+    });
+
+    return institutions
+      .filter(
         (i) =>
           (!verifiedOnly || i.verified) &&
           (type === "all" ||
@@ -856,9 +861,14 @@ function Explore(s: Shared) {
           (i.nameKm + i.nameEn + i.services.join(""))
             .toLowerCase()
             .includes(s.search.toLowerCase()),
-      ),
-    [verifiedOnly, type, s.search],
-  );
+      )
+      .sort((a, b) =>
+        collator.compare(
+          s.locale === "km" ? a.nameKm : a.nameEn,
+          s.locale === "km" ? b.nameKm : b.nameEn,
+        ),
+      );
+  }, [institutions, verifiedOnly, type, s.search, s.locale]);
   return (
     <div className="page directory-page">
       <div className="page-title">
