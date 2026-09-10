@@ -1,0 +1,39 @@
+{
+  "name": "pisey-finance",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "bun@1.4.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "import:cma": "bun scripts/import-cma.ts",
+    "enrich:websites": "bun scripts/enrich-official-websites.ts",
+    "import:bank-logos": "bun scripts/import-bank-logos.ts",
+    "convex:dev": "convex dev",
+    "db:seed": "bun scripts/seed-convex.ts"
+  },
+  "dependencies": {
+    "@convex-dev/better-auth": "^0.12.5",
+    "@vitejs/plugin-react": "latest",
+    "better-auth": "1.6.15",
+    "convex": "^1.45.0",
+    "lucide-react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "vite": "latest"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "latest",
+    "@testing-library/react": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "jsdom": "latest",
+    "typescript": "latest",
+    "vitest": "latest"
+  }
+}

@@ -1,0 +1,14 @@
+import { defineSchema, defineTable } from 'convex/server'
+import { v } from 'convex/values'
+
+export default defineSchema({
+  institutions: defineTable({
+    slug:v.string(),nameKm:v.string(),nameEn:v.string(),short:v.string(),typeKm:v.string(),typeEn:v.string(),verified:v.boolean(),deposits:v.boolean(),rating:v.number(),reviews:v.number(),provinces:v.array(v.string()),descriptionKm:v.string(),descriptionEn:v.string(),services:v.array(v.string()),color:v.string(),logo:v.optional(v.union(v.string(),v.null())),cmaMember:v.boolean(),sourceUrl:v.string(),checkedAt:v.string(),sourceName:v.union(v.literal('CMA'),v.literal('NBC')),website:v.optional(v.string()),email:v.optional(v.string()),hotline:v.optional(v.string()),address:v.optional(v.string()),officialDescription:v.optional(v.string()),officialCheckedAt:v.optional(v.string()),websiteResearchStatus:v.optional(v.union(v.literal('fetched'),v.literal('partial'),v.literal('unreachable'),v.literal('no_website'))),officialEmails:v.optional(v.array(v.string())),officialPhones:v.optional(v.array(v.string())),socialLinks:v.optional(v.array(v.string())),appLinks:v.optional(v.array(v.string())),productLinks:v.optional(v.array(v.object({category:v.string(),name:v.string(),url:v.string()}))),evidenceUrls:v.optional(v.array(v.string())),pagesChecked:v.optional(v.number()),published:v.boolean(),updatedAt:v.number(),
+  }).index('by_slug',['slug']).index('by_published',['published']).index('by_verified',['verified']),
+  glossaryTerms: defineTable({ slug:v.string(),km:v.string(),en:v.string(),defKm:v.string(),defEn:v.string(),status:v.union(v.literal('draft'),v.literal('published')),updatedAt:v.number() })
+    .index('by_slug',['slug']).index('by_status',['status']),
+  reviews: defineTable({ institutionId:v.id('institutions'),visitorId:v.string(),overall:v.number(),transparency:v.number(),treatment:v.number(),service:v.number(),title:v.string(),body:v.string(),firsthand:v.boolean(),experienceDate:v.string(),status:v.union(v.literal('pending'),v.literal('published'),v.literal('hidden')),createdAt:v.number(),updatedAt:v.number() })
+    .index('by_institution',['institutionId']).index('by_visitor_institution',['visitorId','institutionId']),
+  sources: defineTable({ publisher:v.string(),title:v.string(),url:v.string(),retrievedAt:v.string(),status:v.string() }).index('by_url',['url']),
+  verificationRecords: defineTable({ institutionId:v.id('institutions'),sourceId:v.id('sources'),regulator:v.string(),category:v.string(),checkedAt:v.string(),result:v.string() }).index('by_institution',['institutionId']),
+})
