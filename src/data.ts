@@ -13,6 +13,12 @@ const typeLabels: Record<string, [string, string]> = {
   rural_credit: ['ឥណទានជនបទ', 'Rural credit institution'],
 }
 const websiteUrl = (value?: string | null) => value ? (/^https?:\/\//i.test(value) ? value : `https://${value}`) : undefined
+const CSX_SOURCE = 'https://csx.com.kh/home.jsp'
+const CSX_CHECKED_AT = '2026-09-16'
+const csxListings: Record<string, Pick<Institution, 'csxSecurityType' | 'csxSymbol'>> = {
+  'acleda-bank-plc': { csxSecurityType: 'equity_and_bond', csxSymbol: 'ABC / ABC32A–C' },
+  'lolc-cambodia-plc': { csxSecurityType: 'bond', csxSymbol: 'LOLC31A' },
+}
 
 const khmerNameOverrides: Record<string, string> = {
   'First Commercial Bank Phnom Penh Branch': 'ធនាគារពាណិជ្ជទីមួយ សាខាភ្នំពេញ',
@@ -78,6 +84,7 @@ const cmaInstitutions: Institution[] = cmaDirectory.members.map(member => {
     descriptionEn: `Listed by CMA as a ${typeEn.toLowerCase()}. CMA membership is not evidence of an NBC licence.`,
     services: [], color: '#315f63', logo: member.logo, cmaMember: member.cmaMember,
     sourceUrl: member.sourceUrl, checkedAt: member.retrievedAt, sourceName: 'CMA',
+    csxListed: false, csxSourceUrl: CSX_SOURCE, csxCheckedAt: CSX_CHECKED_AT,
     website: websiteUrl(member.website), email: member.email || undefined,
     hotline: member.hotline || undefined, address: member.address || undefined,
   }
@@ -103,6 +110,7 @@ const nbcBanks: Institution[] = [
     descriptionEn: `Listed by the National Bank of Cambodia as a ${typeEn.toLowerCase()} as of 31 March 2026.`,
     services: [], color: '#315f63', logo: cma?.logo ?? bankLogos[id as keyof typeof bankLogos] ?? null, cmaMember: Boolean(cma),
     sourceUrl: NBC_BANK_SOURCE, checkedAt: NBC_BANK_CHECKED_AT, sourceName: 'NBC' as const,
+    csxListed: false, csxSourceUrl: CSX_SOURCE, csxCheckedAt: CSX_CHECKED_AT,
     website: bankWebsites[id as keyof typeof bankWebsites] ?? cma?.website,
     email: cma?.email, hotline: cma?.hotline, address: cma?.address,
   }
@@ -113,9 +121,11 @@ const directoryInstitutions: Institution[] = [...nbcBanks, ...cmaInstitutions.fi
 const researchById = new Map(websiteResearch.profiles.map(profile => [profile.institutionId, profile]))
 export const institutions: Institution[] = directoryInstitutions.map(institution => {
   const research = researchById.get(institution.id)
-  if (!research) return institution
+  const csx = csxListings[institution.id]
+  const base = { ...institution, csxListed: Boolean(csx), ...csx, csxSourceUrl: CSX_SOURCE, csxCheckedAt: CSX_CHECKED_AT }
+  if (!research) return base
   return {
-    ...institution,
+    ...base,
     website: research.finalUrl ?? institution.website,
     services: research.serviceCategories,
     officialDescription: research.description,

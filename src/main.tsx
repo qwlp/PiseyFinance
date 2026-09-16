@@ -13,7 +13,9 @@ import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
 import { makeFunctionReference } from "convex/server";
 import {
   ArrowLeft,
+  Accessibility,
   BadgeCheck,
+  BarChart3,
   BookOpen,
   Bot,
   Building2,
@@ -21,6 +23,7 @@ import {
   Check,
   ChevronRight,
   CircleHelp,
+  Contrast,
   Eye,
   EyeOff,
   FileText,
@@ -45,6 +48,7 @@ import {
   Sparkles,
   Star,
   Trash2,
+  Type,
   UserRound,
   UserRoundPlus,
   X,
@@ -74,7 +78,7 @@ const copy = {
     details: "មើលព័ត៌មានលម្អិត",
     institutions: "គ្រឹះស្ថានហិរញ្ញវត្ថុ",
     compare: "ប្រៀបធៀប",
-    reviews: "មតិអ្នកប្រើប្រាស់",
+    reviews: "ការវាយតម្លៃរបស់ Finឆែក",
     disclaimer: "ព័ត៌មានទូទៅប៉ុណ្ណោះ មិនមែនជាដំបូន្មានហិរញ្ញវត្ថុវិជ្ជាជីវៈទេ។",
   },
   en: {
@@ -94,7 +98,7 @@ const copy = {
     details: "View details",
     institutions: "Financial institutions",
     compare: "Compare",
-    reviews: "Community reviews",
+    reviews: "FinCheck assessment",
     disclaimer: "General information only — not professional financial advice.",
   },
 };
@@ -107,6 +111,9 @@ const useData = () => useContext(DataContext);
 // Kept only for the unused legacy comparison
 // component below; live views read DataContext.
 const institutions: Institution[] = [];
+
+type AccessibilitySettings = { fontSize: "default" | "large" | "largest"; highContrast: boolean; reduceMotion: boolean };
+const defaultAccessibility: AccessibilitySettings = { fontSize: "default", highContrast: false, reduceMotion: false };
 
 function App() {
   const institutionResult = useQuery(
@@ -125,11 +132,21 @@ function App() {
   const [path, setPath] = useState(location.pathname);
   const [search, setSearch] = useState("");
   const [compare, setCompare] = useState<string[]>([]);
+  const [accessibility, setAccessibility] = useState<AccessibilitySettings>(() => {
+    try { return { ...defaultAccessibility, ...JSON.parse(localStorage.getItem("fincheck-accessibility") ?? "{}") }; }
+    catch { return defaultAccessibility; }
+  });
   const t = copy[locale];
   useEffect(() => {
     document.documentElement.lang = locale;
     localStorage.setItem("locale", locale);
   }, [locale]);
+  useEffect(() => {
+    document.documentElement.dataset.fontSize = accessibility.fontSize;
+    document.documentElement.dataset.contrast = accessibility.highContrast ? "high" : "standard";
+    document.documentElement.dataset.motion = accessibility.reduceMotion ? "reduced" : "standard";
+    localStorage.setItem("fincheck-accessibility", JSON.stringify(accessibility));
+  }, [accessibility]);
   useEffect(() => {
     const pop = () => setPath(location.pathname);
     addEventListener("popstate", pop);
@@ -148,7 +165,7 @@ function App() {
     setPath(next);
     scrollTo(0, 0);
   };
-  const shared = { locale, t, go, search, setSearch, compare, setCompare };
+  const shared = { locale, t, go, search, setSearch, compare, setCompare, accessibility, setAccessibility };
   let content: React.ReactNode;
   if (path === "/") content = <Home {...shared} />;
   else if (path === "/institutions") content = <Explore {...shared} />;
@@ -206,6 +223,8 @@ type Shared = {
   setSearch: (s: string) => void;
   compare: string[];
   setCompare: (v: string[]) => void;
+  accessibility: AccessibilitySettings;
+  setAccessibility: React.Dispatch<React.SetStateAction<AccessibilitySettings>>;
 };
 
 function InstitutionLogo({
@@ -266,6 +285,9 @@ function Header({
   };
   return (
     <header className="topbar">
+      <button className="wordmark" onClick={() => go("/")} aria-label={locale === "km" ? "Finឆែក ទំព័រដើម" : "FinCheck home"}>
+        {locale === "km" ? "Finឆែក" : "FinCheck"}
+      </button>
       <nav className="desktop-nav">
         <button onClick={() => go("/")}>
           {locale === "km" ? "ទំព័រដើម" : "Home"}{" "}
@@ -753,7 +775,7 @@ function InstitutionCard({
       <small>{locale === "km" ? i.typeKm : i.typeEn}</small>
       <div className="rating unrated">
         <MessageSquareText />
-        <span>{locale === "km" ? "មិនទាន់មានមតិ" : "No reviews yet"}</span>
+        <span>{locale === "km" ? "រង្វាស់ដោយ Finឆែក" : "Metrics by FinCheck"}</span>
       </div>
       <div className="card-actions">
         <button
@@ -1531,8 +1553,8 @@ function Consult(s: Shared) {
                 <b>
                   {message.role === "assistant"
                     ? s.locale === "km"
-                      ? "Pisey ឆ្លើយតប"
-                      : "Pisey"
+                      ? "Finឆែក ឆ្លើយតប"
+                      : "FinCheck"
                     : s.locale === "km"
                       ? "អ្នក"
                       : "You"}{" "}
@@ -2078,7 +2100,7 @@ function Account(s: Shared) {
               <div>
                 <span className="account-status">{account.isAnonymous ? (km ? "ភ្ញៀវ" : "Guest") : (km ? "គណនី" : "Account")}</span>
                 <h1>{account.isAnonymous ? (km ? "គណនីភ្ញៀវ" : "Guest account") : account.name}</h1>
-                <p>{account.isAnonymous ? (km ? "រក្សាទុកសម្រាប់ពេលដែលអ្នកកំពុងប្រើកម្មវិធីនេះ" : "Your personal space on Pisey Finance") : account.email}</p>
+                <p>{account.isAnonymous ? (km ? "រក្សាទុកសម្រាប់ពេលដែលអ្នកកំពុងប្រើកម្មវិធីនេះ" : "Your personal space on FinCheck") : account.email}</p>
               </div>
             </div>
             <button className="account-signout" onClick={logout} aria-label={km ? "ចាកចេញពីគណនី" : "Sign out"}><LogOut /></button>
@@ -2098,18 +2120,25 @@ function Account(s: Shared) {
               <ChevronRight />
             </button>
             <button onClick={() => s.go("/institutions")}>
-              <MessageSquareText />
+              <BarChart3 />
               <span>
-                <b>{km ? "មតិរបស់អ្នក" : "Your reviews"} </b>
+                <b>{km ? "ការវាយតម្លៃរបស់ Finឆែក" : "FinCheck assessments"} </b>
                 <small>
                   {km
-                    ? "គ្រប់គ្រងបទពិសោធន៍ដែលអ្នកបានចែករំលែក"
-                    : "Manage experiences you have shared"}{" "}
+                    ? "មើលរង្វាស់ដែលយើងគណនាពីប្រភពផ្លូវការ"
+                    : "View metrics we calculate from official sources"}{" "}
                 </small>
               </span>
               <ChevronRight />
             </button>
           </div>
+          <div className="account-section-title"><span>{km ? "មធ្យោបាយងាយស្រួលប្រើ" : "Accessibility"}</span></div>
+          <section className="accessibility-settings" aria-labelledby="accessibility-title">
+            <div className="accessibility-intro"><Accessibility/><div><b id="accessibility-title">{km ? "កែសម្រួលការបង្ហាញ" : "Adjust your display"}</b><small>{km ? "រក្សាទុកដោយស្វ័យប្រវត្តិសម្រាប់អ្នក។" : "Saved automatically for you."}</small></div></div>
+            <fieldset><legend><Type/>{km ? "ទំហំអក្សរ" : "Text size"}</legend><div className="segmented-control">{(["default","large","largest"] as const).map((size,index)=><button type="button" key={size} className={s.accessibility.fontSize===size?"active":""} aria-pressed={s.accessibility.fontSize===size} onClick={()=>s.setAccessibility(value=>({...value,fontSize:size}))}>{km?["ធម្មតា","ធំ","ធំបំផុត"][index]:["Default","Large","Largest"][index]}</button>)}</div></fieldset>
+            <label className="accessibility-toggle"><Contrast/><span><b>{km ? "កម្រិតពណ៌ខ្ពស់" : "High contrast"}</b><small>{km ? "ធ្វើឱ្យអក្សរ និងបន្ទាត់កាន់តែច្បាស់" : "Strengthen text and interface boundaries"}</small></span><input type="checkbox" checked={s.accessibility.highContrast} onChange={event=>s.setAccessibility(value=>({...value,highContrast:event.target.checked}))}/></label>
+            <label className="accessibility-toggle"><Accessibility/><span><b>{km ? "កាត់បន្ថយចលនា" : "Reduce motion"}</b><small>{km ? "បិទចលនាដែលមិនចាំបាច់" : "Limit non-essential animation"}</small></span><input type="checkbox" checked={s.accessibility.reduceMotion} onChange={event=>s.setAccessibility(value=>({...value,reduceMotion:event.target.checked}))}/></label>
+          </section>
         </section>
       </div>
     );
@@ -2143,8 +2172,8 @@ function Account(s: Shared) {
                   ? "សូមស្វាគមន៍មកវិញ"
                   : "Welcome back"
                 : km
-                  ? "ចាប់ផ្ដើមជាមួយ Pisey"
-                  : "Get started with Pisey"}{" "}
+                  ? "ចាប់ផ្ដើមជាមួយ Finឆែក"
+                  : "Get started with FinCheck"}{" "}
             </h2>{" "}
             <p>
               {mode === "login"

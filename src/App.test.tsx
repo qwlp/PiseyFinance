@@ -46,4 +46,13 @@ describe('institution fixtures', () => {
       expect(product.url).toMatch(/^https?:\/\//)
     }
   })
+
+  it('identifies current CSX-listed financial institutions separately', () => {
+    const listed = institutions.filter(institution => institution.csxListed)
+    expect(listed.map(institution => institution.id).sort()).toEqual([
+      'acleda-bank-plc',
+      'lolc-cambodia-plc',
+    ])
+    expect(listed.every(institution => institution.csxSymbol && institution.csxCheckedAt === '2026-09-16')).toBe(true)
+  })
 })
