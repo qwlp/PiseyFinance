@@ -1,4 +1,4 @@
-# Pisey Finance
+# FinCheck (Finឆែក)
 
 Khmer-first responsive prototype for exploring Cambodian financial institutions. It implements the Phase 0 visual flows from `PROJECT_PLAN.md` with fixture data.
 
@@ -14,7 +14,19 @@ bun run dev
 Chat uses `google/gemini-2.5-flash-lite` through OpenRouter by default. Set
 `OPENROUTER_MODEL` to another OpenRouter model ID to override it.
 
-Institutions, verification/source fields, glossary terms, and submitted reviews are read from and written to Convex. The seed command is idempotent and imports the reviewed local source snapshot in batches.
+For Vercel, configure `VITE_CONVEX_URL` and `VITE_CONVEX_SITE_URL` for the
+same Convex deployment, and set `VITE_SITE_URL` and `OPENROUTER_SITE_URL` to
+the public site origin. Store `OPENROUTER_KEY` as a server-only secret.
+The `/api/chat` function shares its handler with the local Vite server.
+Redeploy after changing Vercel environment variables.
+
+Authentication also requires `SITE_URL` **on Convex** to match the public
+site origin (`bunx convex env set SITE_URL https://your-site.vercel.app`).
+Select the deployment used by the frontend; use `--prod` only if the frontend
+points to the project's production Convex deployment. Local development
+should use a separate Convex deployment with its own localhost `SITE_URL`.
+
+Institutions, verification/source fields, CSX listing status, glossary terms, and FinCheck assessment inputs are read from Convex. The seed command is idempotent and imports the reviewed local source snapshot in batches.
 
 Official website research is stored in `src/data/official-websites.json`. The snapshot covers every institution in the local NBC/CMA directory, keeps a source URL for every discovered product page, and records unreachable or unpublished websites instead of inferring missing facts. Refresh all sites with:
 
