@@ -286,7 +286,8 @@ function Header({
   return (
     <header className="topbar">
       <button className="wordmark" onClick={() => go("/")} aria-label={locale === "km" ? "Finឆែក ទំព័រដើម" : "FinCheck home"}>
-        {locale === "km" ? "Finឆែក" : "FinCheck"}
+        <img src="/logo.png" alt="" />
+        <span>{locale === "km" ? "Finឆែក" : "FinCheck"}</span>
       </button>
       <nav className="desktop-nav">
         <button onClick={() => go("/")}>
